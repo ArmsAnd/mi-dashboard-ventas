@@ -1,0 +1,394 @@
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #050505;
+            font-family: system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            color: white;
+            touch-action: pan-y;
+        }
+
+        /* ============================
+           FONDO WEBGL (VELARIS)
+           ============================ */
+        .velaris-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        #velaris-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* ============================
+           CONTENIDO PRINCIPAL
+           ============================ */
+        .main-content {
+            position: relative;
+            z-index: 1;
+            padding: 80px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 9999px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: transparent;
+            backdrop-filter: blur(8px);
+            font-size: 12px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 600;
+            letter-spacing: -0.025em;
+            margin-bottom: 12px;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        .subtitle {
+            font-size: clamp(0.875rem, 1.5vw, 1rem);
+            color: rgba(255, 255, 255, 0.75);
+            max-width: 500px;
+            margin: 0 auto;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        /* ============================
+           GRID DE ICONOS
+           ============================ */
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .icon-card {
+            position: relative;
+            height: 220px;
+            border-radius: 20px;
+            background: transparent;
+            border: none;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+            touch-action: pan-y;
+        }
+
+        .icon-card:hover,{
+            transform: translateY(-8px);
+        }
+
+        /* ============================
+           CAPA DEL ICONO (FIJA ARRIBA)
+           ============================ */
+        .icon-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            z-index: 2;
+            transition: transform 0.4s ease;
+            pointer-events: none;
+        }
+
+        .icon-card:hover .icon-layer,
+        .icon-card:focus-visible .icon-layer,
+        .icon-card.slider-active .icon-layer {
+            transform: scale(0.85);
+        }
+
+        .icon-wrapper {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* CAMBIO: Sombra muy sutil en el icono (antes era 0.6 de opacidad y 12px de blur) */
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+            transition: transform 0.4s ease;
+        }
+
+        .icon-card:hover .icon-wrapper {
+            transform: scale(1.1);
+        }
+
+        .icon-wrapper svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .icon-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #ffffff;
+            letter-spacing: 0.3px;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s ease;
+        }
+
+        .icon-card:hover .icon-label,
+        .icon-card:focus-visible .icon-label,
+        .icon-card.slider-active .icon-label {
+            opacity: 0;
+        }
+
+        /* ============================
+           CAPA DEL SLIDER - TOTALMENTE TRANSPARENTE
+           ============================ */
+        .slider-layer {
+            position: absolute;
+            top: 80px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            transform: translateY(100%);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 3;
+            overflow: hidden;
+            border-radius: 0 0 20px 20px;
+            /* CAMBIO: Totalmente transparente, sin blur, sin fondo, sin bordes, sin sombras */
+            border: none;
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            box-shadow: none;
+        }
+
+        .icon-card:hover .slider-layer,
+        .icon-card:focus-visible .slider-layer,
+        .icon-card.slider-active .slider-layer {
+            transform: translateY(0);
+        }
+
+        /* Slider interno */
+        .slider-track {
+            display: flex;
+            height: 100%;
+            width: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
+        }
+
+        .slider-track.dragging {
+            transition: none;
+            cursor: grabbing;
+        }
+
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 16px 14px;
+            text-align: center;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* CAMBIO: Sombras un poco más marcadas en el texto para compensar que no hay fondo */
+        .slide-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+        }
+
+        .slide-desc {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1.4;
+            max-width: 95%;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 6px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+        }
+
+        .slide-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* CAMBIO: Sombra más sutil en el icono del slide */
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+            pointer-events: none;
+        }
+
+        .slide-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: white;
+            stroke: white;
+        }
+
+        /* Indicadores (dots) */
+        .slider-dots {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 4;
+            pointer-events: auto;
+        }
+
+        .dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            /* Sombra sutil para que se vean sobre fondos claros */
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+        }
+
+        .dot.active {
+            background: white;
+            width: 14px;
+            border-radius: 3px;
+        }
+
+        /* ============================
+           RESPONSIVE
+           ============================ */
+        @media (max-width: 640px) {
+            .main-content {
+                padding: 50px 16px;
+            }
+            .header {
+                margin-bottom: 40px;
+            }
+            h1 {
+                font-size: 1.75rem;
+            }
+            .subtitle {
+                font-size: 0.85rem;
+            }
+            .icon-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 14px;
+                max-width: 100%;
+            }
+            .icon-card {
+                height: 180px;
+            }
+            .icon-layer {
+                height: 65px;
+                gap: 2px;
+            }
+            .icon-wrapper {
+                width: 40px;
+                height: 40px;
+                /* Sombra aún más sutil en móvil */
+                filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
+            }
+            .icon-label {
+                font-size: 11px;
+            }
+            .slider-layer {
+                top: 65px;
+            }
+            .slide {
+                padding: 10px 8px;
+                gap: 4px;
+            }
+            .slide-icon {
+                width: 26px;
+                height: 26px;
+                filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
+            }
+            .slide-title {
+                font-size: 13px;
+            }
+            .slide-desc {
+                font-size: 9px;
+                line-height: 1.3;
+            }
+            .slider-dots {
+                bottom: 6px;
+                gap: 4px;
+            }
+            .dot {
+                width: 4px;
+                height: 4px;
+            }
+            .dot.active {
+                width: 11px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .icon-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .icon-card {
+                height: 160px;
+            }
+            .icon-layer {
+                height: 58px;
+            }
+            .icon-wrapper {
+                width: 36px;
+                height: 36px;
+            }
+            .icon-label {
+                font-size: 10px;
+            }
+            .slider-layer {
+                top: 58px;
+            }
+            .slide-title {
+                font-size: 12px;
+            }
+            .slide-desc {
+                font-size: 8.5px;
+            }
+        }
